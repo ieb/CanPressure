@@ -54,7 +54,7 @@
 * F resets the EEPROM to the Factory settings
 * r reads the sensors and dumps to serial.
 * d toggles disagnostic output which includes CAN Frame data 
-* s reports current status including packet counts, MCP Volatage and temperature.
+* s reports current status including packet counts, MCP Voltage and temperature.
 
 
 # Developing
