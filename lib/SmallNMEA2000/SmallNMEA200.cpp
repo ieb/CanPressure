@@ -14,7 +14,6 @@ bool SNMEA2000::open() {
     if ( CAN.begin(CAN_250KBPS, MCP_8MHz)==CAN_OK ) {
         delay(200);
         claimAddress();
-        Serial.println(F("Claimed Address Sent"));
         return true;
     }
     return false;
@@ -72,6 +71,7 @@ void SNMEA2000::handleISOAddressClaim(MessageHeader *messageHeader, byte * buffe
 
 void SNMEA2000::claimAddress() {
     clearRXFilter();
+    rxFiltersSet = true;
     sendIsoAddressClaim();
     addressClaimStarted = millis();
 }
@@ -80,8 +80,11 @@ bool SNMEA2000::hasClaimedAddress() {
     if (addressClaimStarted+250 > millis() ) {
         Serial.print(F("Address claimed as "));
         Serial.println(deviceAddress);
-        addressClaimStarted=0;
-        setupRXFilter();
+        rxFiltersSet = false;
+        addressClaimStarted = 0;
+    }
+    if ( !rxFiltersSet ) {
+        rxFiltersSet = setupRXFilter();
     }
     return (addressClaimStarted==0);
 }
@@ -280,7 +283,7 @@ void SNMEA2000::output4ByteUDouble(double value, double precision) {
     }
 }
 
-void SNMEA2000::setupRXFilter() {
+bool SNMEA2000::setupRXFilter() {
         // CAN ID is 29 bits long
         // 111 1 1 11111111 11111111 11111111
         //                           -------- Source Addresss 8 bits @0
@@ -315,19 +318,35 @@ void SNMEA2000::setupRXFilter() {
 
 
         
-        Serial.println(F("Set Masks and Filters"));
-        CAN.init_Mask(0,1,0xf9ff00);
-        CAN.init_Mask(1,1,0xf9ff00);
-        CAN.init_Filt(0,1,0xE8FF00); // broadcasts
-        CAN.init_Filt(1,1,0xE80000 | (((uint16_t)deviceAddress<<8)&0xff00)); // thisDevice
+        bool ret = true;
+        if (CAN.init_Mask(0,1,0xf9ff00) != MCP2515_OK) {
+            ret = false;
+        }
+        if (CAN.init_Mask(1,1,0xf9ff00) != MCP2515_OK ) {
+            ret = false;
+        } 
+        // broadcasts
+        if (CAN.init_Filt(0,1,0xE8FF00) != MCP2515_OK ) {
+            ret = false;
+        } 
+        // thisDevice
+       if (CAN.init_Filt(1,1,0xE80000 | (((uint16_t)deviceAddress<<8)&0xff00)) != MCP2515_OK ) {
+            ret = false;
+       }
+    return ret;
 }
 
 
 
-void SNMEA2000::clearRXFilter() {
-    Serial.println(F("Clear Masks"));
-    CAN.init_Mask(0,1,0x0);
-    CAN.init_Mask(1,1,0x0);
+bool SNMEA2000::clearRXFilter() {
+    bool ret = true;
+    if ( CAN.init_Mask(0,1,0x0)  != MCP2515_OK ) {
+        ret = false;
+    }
+    if ( CAN.init_Mask(1,1,0x0)  != MCP2515_OK ) {
+        ret = false;
+    }
+    return ret;
 }
 
 

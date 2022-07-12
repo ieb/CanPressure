@@ -43,9 +43,6 @@ const SNMEA2000DeviceInfo devInfo = SNMEA2000DeviceInfo(
 
 #define DEVICE_ADDRESS 25
 #define SNMEA_SPI_CS_PIN PIN_PA5  
-#define SNMEA_SPI_MOSI_PIN PIN_PA2
-#define SNMEA_SPI_MIS0_PIN PIN_PA1
-#define SNMEA_SPI_MIS0_SCK PIN_PA3
 
 PressureMonitor pressureMonitor = PressureMonitor(DEVICE_ADDRESS, 
           &devInfo, 
@@ -53,9 +50,6 @@ PressureMonitor pressureMonitor = PressureMonitor(DEVICE_ADDRESS,
           &configInfo, 
           &txPGN[0], 
           &rxPGN[0],
-          SNMEA_SPI_MOSI_PIN,
-          SNMEA_SPI_MIS0_PIN,
-          SNMEA_SPI_MIS0_SCK,
           SNMEA_SPI_CS_PIN
 );
 CommandLine commandLine = CommandLine(&Serial, &pressureMonitor);
@@ -94,19 +88,23 @@ void sendReading() {
 void setup() {
   Serial.begin(115200);
   Serial.println(F("Pressure monitor start"));
-  Wire.begin();
-  if (!BMESensor.begin()) {
-    Serial.println(F("Failed to start Sensor"));
-
-  } else {
-    Serial.println(F("Sensor Ok"));
-  }
   commandLine.begin();
-  Serial.println(F("Opening CAN"));
+
+
+  Wire.begin();
+  while (!BMESensor.begin()) {
+    Serial.println(F("Failed to start Sensor, retry in 5s"));
+    delay(5000);
+  }
+  Serial.println(F("Sensor Ok"));
   pressureMonitor.setSerialNumber(commandLine.getSerialNumber());
   pressureMonitor.setDeviceAddress(commandLine.getDeviceAddress());
-  pressureMonitor.open();
-  Serial.println(F("Opened"));
+  Serial.println(F("Opening CAN"));
+  while ( !pressureMonitor.open() ) {
+    Serial.println(F("Failed to start NMEA2000, retry in 5s"));
+    delay(5000);
+  }
+  Serial.println(F("Opened, MCP2515 Operational"));
   Serial.println(F("Running..."));
 }
 

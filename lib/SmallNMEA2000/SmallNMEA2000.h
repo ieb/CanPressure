@@ -87,6 +87,8 @@ class SNMEA2000DeviceInfo {
             deviceInformation.industryGroupAndSystemInstance = (industryGroup<<4) | (systemInstance&0x0f);
         };
         void setSerialNumber(uint32_t uniqueNumber) {
+            Serial.print("Serial Number set to ");
+            Serial.println(uniqueNumber);
             deviceInformation.unicNumberAndManCode=(deviceInformation.unicNumberAndManCode&0xffe00000) | (uniqueNumber&0x1fffff);
         }
         uint64_t getName() {
@@ -229,9 +231,6 @@ class SNMEA2000 {
         const SNMEA2000ConfigInfo * cinfo,
         const unsigned long *tx,
         const unsigned long *rx,
-        const uint8_t mosiPin,
-        const uint8_t misoPin,
-        const uint8_t sckPin,
         const uint8_t csPin
         ): 
         deviceAddress{addr},
@@ -242,18 +241,15 @@ class SNMEA2000 {
         rxPGNList{rx} ,
         CAN{csPin}
         {
-            if ( SPI.pins(mosiPin, misoPin, sckPin) ) {
-                Serial.println("SPI Pins Initialised");
-            }
         };
 
         bool open();
         void processMessages();
         void dumpStatus() {
             Serial.print(F("NMEA2000 Status sent="));
-            Serial.print(messagesRecieved);
-            Serial.print(F(" recieved="));
             Serial.print(messagesSent);
+            Serial.print(F(" recieved="));
+            Serial.print(messagesRecieved);
             Serial.print(F(" packet errors="));
             Serial.print(packetErrors);
             Serial.print(F(" frame errors="));
@@ -264,8 +260,14 @@ class SNMEA2000 {
         };
         void sendMessage(MessageHeader *messageHeader, byte *message, int len);
         //void sendFastPacket(MessageHeader *messageHeader, byte *message, int len, bool progmem=false);    
-        void setSerialNumber(uint16_t serialNumber) { devInfo->setSerialNumber(serialNumber); };
-        void setDeviceAddress(unsigned char deviceAddress) { deviceAddress = deviceAddress; };
+        void setSerialNumber(uint16_t serialNumber) { 
+            devInfo->setSerialNumber(serialNumber); 
+        };
+        void setDeviceAddress(unsigned char _deviceAddress) { 
+            deviceAddress = _deviceAddress; 
+            Serial.print("Device Address set to ");
+            Serial.println(deviceAddress);
+        };
         unsigned char getAddress() { return deviceAddress; };
         void startPacket(MessageHeader *messageHeader);
         void finishPacket();
@@ -301,8 +303,8 @@ class SNMEA2000 {
         void sendProductInformation(MessageHeader *requestMessageHeader);
         void sendConfigurationInformation(MessageHeader *requestMessageHeader);
         void sendIsoAcknowlegement(MessageHeader *requestMessageHeader, byte control, byte groupFunction);
-        void clearRXFilter();
-        void setupRXFilter();
+        bool clearRXFilter();
+        bool setupRXFilter();
         int getPgmSize(const char *str, int maxLen);
 
 
@@ -318,11 +320,12 @@ class SNMEA2000 {
         //output buffer and frames
         MessageHeader *packetMessageHeader;
         bool fastPacket;
+        bool rxFiltersSet = false;
+        bool diagnostics = false;
         uint8_t fastPacketSequence;
         byte buffer[8];
         uint8_t frame;
         uint8_t ob;
-        bool diagnostics = false;
         uint16_t messagesRecieved = 0;
         uint16_t messagesSent = 0;
         uint16_t packetErrors = 0;
@@ -340,11 +343,8 @@ class PressureMonitor : public SNMEA2000 {
         const SNMEA2000ConfigInfo * cinfo,
         const unsigned long *tx,
         const unsigned long *rx,
-        const uint8_t mosiPin,
-        const uint8_t misoPin,
-        const uint8_t sckPin,
         const uint8_t csPin
-        ): SNMEA2000{addr, devInfo, pinfo, cinfo, tx, rx, mosiPin, misoPin, sckPin, csPin} {};
+        ): SNMEA2000{addr, devInfo, pinfo, cinfo, tx, rx, csPin} {};
 
     /**
      * @brief PGN 130310 
@@ -392,11 +392,8 @@ class EngineMonitor : public SNMEA2000 {
         const SNMEA2000ConfigInfo * cinfo,
         const unsigned long *tx,
         const unsigned long *rx,
-         const uint8_t mosiPin,
-        const uint8_t misoPin,
-        const uint8_t sckPin,
         const uint8_t csPin
-        ): SNMEA2000{addr, devInfo, pinfo, cinfo, tx, rx, mosiPin, misoPin, sckPin, csPin} {};
+        ): SNMEA2000{addr, devInfo, pinfo, cinfo, tx, rx, csPin} {};
     /**
      * RapidEngine Data - PGN 127488, standard packet
      * enginInstance starting a 0

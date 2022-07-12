@@ -518,7 +518,7 @@ Text GLabel 11200 3750 2    60   BiDi ~ 0
 SDA3
 Connection ~ 11050 3750
 Text GLabel 3700 6650 0    60   BiDi ~ 0
-SDA3
+SDA
 $Comp
 L BSS138 Q102
 U 1 1 62C27096
@@ -582,9 +582,9 @@ Text GLabel 11200 4850 2    60   BiDi ~ 0
 SCL3
 Connection ~ 11050 4850
 Text GLabel 3700 6550 0    60   BiDi ~ 0
-SCL3
+SCL
 Text GLabel 3700 6350 0    60   Input ~ 0
-3V
+5V
 Text GLabel 3500 4500 0    60   Input ~ 0
 RX
 Text GLabel 3500 4650 0    60   Output ~ 0
@@ -716,10 +716,10 @@ Wire Wire Line
 Wire Wire Line
 	6750 1400 6750 1150
 $Comp
-L GND #PWR?
+L GND #PWR010
 U 1 1 62CAA044
 P 10750 6450
-F 0 "#PWR?" H 10750 6450 30  0001 C CNN
+F 0 "#PWR010" H 10750 6450 30  0001 C CNN
 F 1 "GND" H 10750 6380 30  0001 C CNN
 F 2 "" H 10750 6450 60  0001 C CNN
 F 3 "" H 10750 6450 60  0001 C CNN

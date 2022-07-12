@@ -373,9 +373,9 @@ Text GLabel 5650 8900 2    60   BiDi ~ 0
 CANL
 Text GLabel 5600 3900 2    60   Output ~ 0
 SCK
-Text GLabel 5600 4050 2    60   Output ~ 0
+Text GLabel 5600 4200 2    60   Output ~ 0
 MOSI
-Text GLabel 5600 4200 2    60   Input ~ 0
+Text GLabel 5600 4050 2    60   Input ~ 0
 MISO
 Text GLabel 3500 4050 0    60   Output ~ 0
 CANCS

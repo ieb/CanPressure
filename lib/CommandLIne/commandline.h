@@ -20,7 +20,7 @@ extern void setDiagnostics(bool enabled);
 
 const uint8_t epromDefaultValues[HR_CRC] PROGMEM = {
   0x1a, 0x00,  // device address 26
-  0x00, 0x00  // serial number
+  0x04, 0x00  // serial number
 };
 
 
@@ -190,7 +190,7 @@ class CommandLine {
 
 
         void showHelp() {
-            io->println(F("Battery Monitor - key presses"));
+            io->println(F("Pressure Monitor - key presses"));
             io->println(F("  - 'h' or '?' to show this message"));
             io->println(F("  - 's' show status"));
             io->println(F("  - 'd' toggle diagnostics"));
