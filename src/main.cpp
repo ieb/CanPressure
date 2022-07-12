@@ -67,6 +67,7 @@ void setDiagnostics(bool enabled) {
 
 void sendReading() {
   static unsigned long lastReadingUpdate=0;
+  static byte sid = 0;
   unsigned long now = millis();
   if ( now > lastReadingUpdate+READING_UPDATE_PERIOD ) {
     lastReadingUpdate = now;
@@ -79,8 +80,19 @@ void sendReading() {
       Serial.print(F(" humidity:"));
       Serial.println(BMESensor.humidity);
     }
-    pressureMonitor.sendOutsideEnvironmentParameters(BMESensor.pressure, BMESensor.temperature, BMESensor.humidity);
-    pressureMonitor.sendEnvironmentParameters(BMESensor.pressure, BMESensor.temperature, BMESensor.humidity);
+
+
+
+#define MAIN_CABIN_TEMPERATURE 4
+#define INSIDE_HUMIDITY 0
+#define ATMOSPHERIC 0
+    pressureMonitor.sendOutsideEnvironmentParameters(sid, SNMEA2000::n2kDoubleNA,  CToKelvin(BMESensor.temperature), BMESensor.pressure);
+    pressureMonitor.sendEnvironmentParameters(sid, BMESensor.pressure, MAIN_CABIN_TEMPERATURE, CToKelvin(BMESensor.temperature), INSIDE_HUMIDITY, BMESensor.humidity);
+    // NMEA2000 v3 messages, more resolution.
+    pressureMonitor.sendPressure(sid, ATMOSPHERIC, 0, BMESensor.pressure);
+    pressureMonitor.sendTemperature(sid, MAIN_CABIN_TEMPERATURE, 0, CToKelvin(BMESensor.temperature));
+    pressureMonitor.sendHumidity(sid, INSIDE_HUMIDITY, 0, BMESensor.humidity);
+    sid++;
   }
 }
 

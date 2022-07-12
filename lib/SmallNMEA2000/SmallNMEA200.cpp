@@ -231,7 +231,8 @@ void SNMEA2000::output2ByteDouble(double value, double precision) {
         outputByte(0xff);
         outputByte(0x7f);
     } else {
-        double vd=round(value/precision);
+        double vd=value/precision;
+        vd = round(vd);
         int16_t i = (vd>=-32768 && vd<0x7fee)?(int16_t)vd:0x7fee;
         outputByte(i&0xff);
         outputByte((i>>8)&0xff);
@@ -243,13 +244,31 @@ void SNMEA2000::output2ByteUDouble(double value, double precision) {
         outputByte(0xff);
         outputByte(0xff);
     } else {
-        double vd=round(value/precision);
+        double vd=value/precision;
+        vd = round(vd);
         uint16_t i = (vd>=0 && vd<0xfffe)?(int16_t)vd:0xfffe;
         outputByte(i&0xff);
         outputByte((i>>8)&0xff);
     }
 
 }
+
+void SNMEA2000::output3ByteDouble(double value, double precision) {
+    if (value == SNMEA2000::n2kDoubleNA ) {
+        // undef is 2147483647 = 7FFFFF
+        outputByte(0xff);
+        outputByte(0xff);
+        outputByte(0x7f);
+    } else {
+        double vd=value/precision;
+        vd = round(vd);
+        int32_t i = (vd>=-8388608L && vd<8388606L)?(int32_t)vd:8388606L;
+        outputByte(i&0xff);
+        outputByte((i>>8)&0xff);
+        outputByte((i>>16)&0xff);
+    }
+}
+
 void SNMEA2000::output4ByteDouble(double value, double precision) {
     if (value == SNMEA2000::n2kDoubleNA ) {
         // undef is 2147483647 = 7FFFFFFF
@@ -258,14 +277,19 @@ void SNMEA2000::output4ByteDouble(double value, double precision) {
         outputByte(0xff);
         outputByte(0x7f);
     } else {
-        double vd=round(value/precision);
-        int32_t i = (vd>=-2147483648L && vd<0x7ffffffe)?(int16_t)vd:0x7ffffffe;
+        double vd=value/precision;
+        vd = round(vd);
+        int32_t i = (vd>=-2147483648L && vd<0x7ffffffe)?(int32_t)vd:0x7ffffffe;
         outputByte(i&0xff);
         outputByte((i>>8)&0xff);
         outputByte((i>>16)&0xff);
         outputByte((i>>24)&0xff);
     }
 }
+
+
+
+
 void SNMEA2000::output4ByteUDouble(double value, double precision) {
     if (value == SNMEA2000::n2kDoubleNA ) {
         // undef is 4294967295U = FFFFFFFF
@@ -274,7 +298,8 @@ void SNMEA2000::output4ByteUDouble(double value, double precision) {
         outputByte(0xff);
         outputByte(0xff);
     } else {
-        double vd=round(value/precision);
+        double vd=value/precision;
+        vd = round(vd);
         uint32_t i = (vd>=0 && vd<0xfffffffe)?(uint32_t)vd:0xfffffffe;
         outputByte(i&0xff);
         outputByte((i>>8)&0xff);
@@ -577,6 +602,41 @@ void PressureMonitor::sendEnvironmentParameters(
     output2ByteUDouble(temperature,0.01);
     output2ByteUDouble(humidity,0.004);
     output2ByteUDouble(atmosphericPressure,100);
+    finishPacket();
+}
+
+
+void PressureMonitor::sendHumidity(byte sid, byte humiditySource, byte humidityInstance, double humidity) {
+    MessageHeader messageHeader(130313L, 5, getAddress(), SNMEA2000::broadcastAddress);
+    startPacket(&messageHeader);
+    outputByte(sid);
+    outputByte(humidityInstance);
+    outputByte(humiditySource);
+    output2ByteDouble(humidity,0.004);
+    output2ByteDouble(SNMEA2000::n2kDoubleNA,0.004);
+    outputByte(0xff);
+    finishPacket();
+}
+
+void PressureMonitor::sendPressure(byte sid, byte pressureSource, byte pressureInstance, double pressure ) {
+    MessageHeader messageHeader(130314L, 5, getAddress(), SNMEA2000::broadcastAddress);
+    startPacket(&messageHeader);
+    outputByte(sid);
+    outputByte(pressureInstance);
+    outputByte(pressureSource);
+    output4ByteDouble(pressure,0.1);
+    outputByte(0xff);
+    finishPacket();
+}
+
+void PressureMonitor::sendTemperature(byte sid, byte temperatureSource,  byte temperatureInstance, double tremperature ) {
+    MessageHeader messageHeader(130316L, 5, getAddress(), SNMEA2000::broadcastAddress);
+    startPacket(&messageHeader);
+    outputByte(sid);
+    outputByte(temperatureInstance);
+    outputByte(temperatureSource);
+    output3ByteDouble(tremperature,0.001);
+    output2ByteDouble(SNMEA2000::n2kDoubleNA,0.1);
     finishPacket();
 }
 

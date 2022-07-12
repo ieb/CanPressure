@@ -4,7 +4,7 @@
 #include <mcp_can.h>
 
 
-
+#define CToKelvin(x) (x+273.15)
 
 
 typedef struct MsgHeader {
@@ -282,6 +282,7 @@ class SNMEA2000 {
         void output2ByteInt(uint16_t i);
         void output2ByteDouble(double v, double p);
         void output2ByteUDouble(double v, double p);
+        void output3ByteDouble(double v, double p);
         void output4ByteDouble(double v, double p);
         void output4ByteUDouble(double v, double p);
 
@@ -381,6 +382,36 @@ class PressureMonitor : public SNMEA2000 {
         byte humiditySource=0,
         double humidity=SNMEA2000::n2kDoubleNA // humidity
         ); 
+
+    /**
+     * @brief PGN 130313L
+     * @param sid
+     * @param humiditySource
+     * @param humidityInstance
+     * @param humidity in percent
+     */
+    void sendHumidity(byte sid, byte humiditySource, byte humidityInstance, double humidity);
+
+
+
+    /**
+     * @brief PGN 130314L
+     * @param sid
+     * @param pressureSource
+     * @param pressureInstance
+     * @param pressure in Pascal
+     */
+    void sendPressure(byte sid, byte pressureSource, byte pressureInstance, double pressure );
+
+    /**
+     * @brief PGN 130316L
+     * @param sid
+     * @param temperatureSource
+     * @param temperatureInstance
+     * @param temperature in K
+     */
+    void sendTemperature(byte sid, byte temperatureSource,  byte temperatureInstance, double temperature );
+
 };
 
 
