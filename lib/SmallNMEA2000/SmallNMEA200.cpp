@@ -61,10 +61,16 @@ void SNMEA2000::processMessages() {
 
 
 void SNMEA2000::handleISOAddressClaim(MessageHeader *messageHeader, byte * buffer, int len) {
-    if ( messageHeader->source == 254 ) return;
+    if ( messageHeader->source == 254 ) return; // annother node cannot claim an address, ignore this.
     uint64_t callerName = (((uint64_t)buffer[2])<<16) | (((uint64_t)buffer[1])<<8) | buffer[0];
-    if ( devInfo->getName() > callerName ) { // our name is < callers we can keep it.
-        deviceAddress++;
+    if ( messageHeader->source == deviceAddress ) {
+        // annother device is claiming this address 
+        if (devInfo->getName() > callerName ) { 
+            // but our name is > callers so we must increment address and claim
+            // 
+            messageHeader->print("Claim has higher precidence:", buffer, len);
+            deviceAddress++;
+        }
     }
     claimAddress();
 }
