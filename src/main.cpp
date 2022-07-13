@@ -24,11 +24,15 @@ const SNMEA2000ConfigInfo configInfo PROGMEM={
       "https://github.com/ieb/CanPressure"
 };
 
+uint8_t pgnEnableRegister = 0xff;
 
 
 const unsigned long txPGN[] PROGMEM = { 
     130310L, //  Outside Environmental parameters
     130311L,  // Environmental parameters
+    130313L,  // Humidity parameters
+    130314L,  // Pressure parameters
+    130316L,  // Temperature parameters
     SNMEA200_DEFAULT_TX_PGN
 };
 const unsigned long rxPGN[] PROGMEM = { 
@@ -63,36 +67,53 @@ void setDiagnostics(bool enabled) {
 
 }
 
-#define READING_UPDATE_PERIOD 10000
+#define READING_UPDATE_PERIOD 2000
 
 void sendReading() {
-  static unsigned long lastReadingUpdate=0;
+  static unsigned long nextReadingUpdate=0;
+  static unsigned long next130310Update=0;
+  static unsigned long next130311Update=0;
+  static unsigned long next130313Update=0;
+  static unsigned long next130314Update=0;
+  static unsigned long next130316Update=0;
   static byte sid = 0;
   unsigned long now = millis();
-  if ( now > lastReadingUpdate+READING_UPDATE_PERIOD ) {
-    lastReadingUpdate = now;
+  if ( now > nextReadingUpdate ) {
+    nextReadingUpdate = now+READING_UPDATE_PERIOD;
     BMESensor.refresh();
     if ( diagnostics ) {
-      Serial.print(F("Sending Reading pressure:"));
+      Serial.print(F("Reading pressure:"));
       Serial.print(BMESensor.pressure);
       Serial.print(F(" temperature:"));
       Serial.print(BMESensor.temperature);
       Serial.print(F(" humidity:"));
       Serial.println(BMESensor.humidity);
     }
-
-
-
+    sid++;
+  }
 #define MAIN_CABIN_TEMPERATURE 4
 #define INSIDE_HUMIDITY 0
 #define ATMOSPHERIC 0
-    pressureMonitor.sendOutsideEnvironmentParameters(sid, SNMEA2000::n2kDoubleNA,  CToKelvin(BMESensor.temperature), BMESensor.pressure);
+  if ( commandLine.periodPGN130310 != 0 && now > next130310Update) {
+    next130310Update = now + commandLine.periodPGN130310;
+    pressureMonitor.sendOutsideEnvironmentParameters(sid, SNMEA2000::n2kDoubleNA,  CToKelvin(BMESensor.temperature), BMESensor.pressure);    
+  }
+  if ( commandLine.periodPGN130311 != 0 && now > next130311Update) {
+    next130311Update = now + commandLine.periodPGN130311;
     pressureMonitor.sendEnvironmentParameters(sid, BMESensor.pressure, MAIN_CABIN_TEMPERATURE, CToKelvin(BMESensor.temperature), INSIDE_HUMIDITY, BMESensor.humidity);
-    // NMEA2000 v3 messages, more resolution.
+  }
+  if ( commandLine.periodPGN130313 != 0 && now > next130313Update) {
+    next130313Update = now + commandLine.periodPGN130313;
+      // NMEA2000 v3 messages, more resolution.
+      pressureMonitor.sendHumidity(sid, INSIDE_HUMIDITY, 0, BMESensor.humidity);
+  }
+  if ( commandLine.periodPGN130314 != 0 && now > next130314Update) {
+    next130314Update = now + commandLine.periodPGN130314;
     pressureMonitor.sendPressure(sid, ATMOSPHERIC, 0, BMESensor.pressure);
+  }
+  if ( commandLine.periodPGN130316 != 0 && now > next130316Update) {
+    next130316Update = now + commandLine.periodPGN130316;
     pressureMonitor.sendTemperature(sid, MAIN_CABIN_TEMPERATURE, 0, CToKelvin(BMESensor.temperature));
-    pressureMonitor.sendHumidity(sid, INSIDE_HUMIDITY, 0, BMESensor.humidity);
-    sid++;
   }
 }
 
@@ -109,8 +130,8 @@ void setup() {
     delay(5000);
   }
   Serial.println(F("Sensor Ok"));
-  pressureMonitor.setSerialNumber(commandLine.getSerialNumber());
-  pressureMonitor.setDeviceAddress(commandLine.getDeviceAddress());
+  pressureMonitor.setSerialNumber(commandLine.serialNumber);
+  pressureMonitor.setDeviceAddress(commandLine.deviceAddress);
   Serial.println(F("Opening CAN"));
   while ( !pressureMonitor.open() ) {
     Serial.println(F("Failed to start NMEA2000, retry in 5s"));
