@@ -26,13 +26,12 @@ extern void setDiagnostics(bool enabled);
 const uint8_t epromDefaultValues[HR_CRC] PROGMEM = {
   0x1a, 0x00,  // device address 26
   0x04, 0x00,  // serial number
-  0x10, 0x27,          //Period in ms for 130310L, //  Outside Environmental parameters
-  0x10, 0x27,          //Period in ms for 130311L,  // Environmental parameters
-  0x10, 0x27,          //Period in ms for 130313L,  // Humidity parameters
-  0x10, 0x27,          //Period in ms for 130314L,  // Pressure parameters
-  0x10, 0x27          //Period in ms for 130316L,  // Temperature parameters
+  0x88, 0x13,          //Period in ms for 130310L, //  Outside Environmental parameters
+  0x88, 0x13,          //Period in ms for 130311L,  // Environmental parameters
+  0x88, 0x13,          //Period in ms for 130313L,  // Humidity parameters
+  0x88, 0x13,          //Period in ms for 130314L,  // Pressure parameters
+  0x88, 0x13          //Period in ms for 130316L,  // Temperature parameters
 };
-
 
 
 
@@ -43,11 +42,11 @@ class CommandLine {
 
         unsigned char deviceAddress = 25;
         uint32_t serialNumber = 123;
-        uint16_t periodPGN130310 = 10000;  //  Outside Environmental parameters
-        uint16_t periodPGN130311 = 10000;  //  Environmental parameters
-        uint16_t periodPGN130313 = 10000;  //  Humidity parameters
-        uint16_t periodPGN130314 = 10000;  //  Pressure parameters
-        uint16_t periodPGN130316 = 10000;  //  Temperature parameters
+        uint16_t periodPGN130310 = 5000;  //  Outside Environmental parameters
+        uint16_t periodPGN130311 = 5000;  //  Environmental parameters
+        uint16_t periodPGN130313 = 5000;  //  Humidity parameters
+        uint16_t periodPGN130314 = 5000;  //  Pressure parameters
+        uint16_t periodPGN130316 = 5000;  //  Temperature parameters
 
         void begin() {
             loadDefaults();

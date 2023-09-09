@@ -70,16 +70,16 @@ void setDiagnostics(bool enabled) {
 #define READING_UPDATE_PERIOD 2000
 
 void sendReading() {
-  static unsigned long nextReadingUpdate=0;
-  static unsigned long next130310Update=0;
-  static unsigned long next130311Update=0;
-  static unsigned long next130313Update=0;
-  static unsigned long next130314Update=0;
-  static unsigned long next130316Update=0;
+  static unsigned long lastReading=0;
+  static unsigned long last130310=0;
+  static unsigned long last130311=0;
+  static unsigned long last130313=0;
+  static unsigned long last130314=0;
+  static unsigned long last130316=0;
   static byte sid = 0;
   unsigned long now = millis();
-  if ( now > nextReadingUpdate ) {
-    nextReadingUpdate = now+READING_UPDATE_PERIOD;
+  if ( now-lastReading > READING_UPDATE_PERIOD ) {
+    lastReading = now;
     BMESensor.refresh();
     if ( diagnostics ) {
       Serial.print(F("Reading pressure:"));
@@ -94,25 +94,25 @@ void sendReading() {
 #define MAIN_CABIN_TEMPERATURE 4
 #define INSIDE_HUMIDITY 0
 #define ATMOSPHERIC 0
-  if ( commandLine.periodPGN130310 != 0 && now > next130310Update) {
-    next130310Update = now + commandLine.periodPGN130310;
+  if ( commandLine.periodPGN130310 != 0 && now-last130310 > commandLine.periodPGN130310) {
+    next130310Update = now;
     pressureMonitor.sendOutsideEnvironmentParameters(sid, SNMEA2000::n2kDoubleNA,  CToKelvin(BMESensor.temperature), BMESensor.pressure);    
   }
-  if ( commandLine.periodPGN130311 != 0 && now > next130311Update) {
-    next130311Update = now + commandLine.periodPGN130311;
+  if ( commandLine.periodPGN130311 != 0 && now-last130311 > commandLine.periodPGN130311) {
+    next130311Update = now;
     pressureMonitor.sendEnvironmentParameters(sid, BMESensor.pressure, MAIN_CABIN_TEMPERATURE, CToKelvin(BMESensor.temperature), INSIDE_HUMIDITY, BMESensor.humidity);
   }
-  if ( commandLine.periodPGN130313 != 0 && now > next130313Update) {
-    next130313Update = now + commandLine.periodPGN130313;
+  if ( commandLine.periodPGN130313 != 0 && now-last130313 >   commandLine.periodPGN130313) {
+    next130313Update = now;
       // NMEA2000 v3 messages, more resolution.
       pressureMonitor.sendHumidity(sid, INSIDE_HUMIDITY, 0, BMESensor.humidity);
   }
-  if ( commandLine.periodPGN130314 != 0 && now > next130314Update) {
-    next130314Update = now + commandLine.periodPGN130314;
+  if ( commandLine.periodPGN130314 != 0 && now-last130314 >  commandLine.periodPGN130314) {
+    next130314Update = now;
     pressureMonitor.sendPressure(sid, ATMOSPHERIC, 0, BMESensor.pressure);
   }
-  if ( commandLine.periodPGN130316 != 0 && now > next130316Update) {
-    next130316Update = now + commandLine.periodPGN130316;
+  if ( commandLine.periodPGN130316 != 0 && now-last130316  > commandLine.periodPGN130316) {
+    next130316Update = now;
     pressureMonitor.sendTemperature(sid, MAIN_CABIN_TEMPERATURE, 0, CToKelvin(BMESensor.temperature));
   }
 }

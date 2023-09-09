@@ -15,10 +15,10 @@ const int SPI_CS_PIN = PIN_PA5;
 MCP_CAN CAN(SPI_CS_PIN);                                    // Set CS pin
 
 void checkChip() {
-    static unsigned long tnext = 0;
+    static unsigned long tlast = 0;
     unsigned long now = millis();
-    if ( now > tnext) {
-        tnext = now + 10000;
+    if ( now-tlast > 1000) {
+        tlast = now;
         CAN.checkChip();
     }
 }
