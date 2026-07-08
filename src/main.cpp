@@ -48,12 +48,15 @@ const SNMEA2000DeviceInfo devInfo = SNMEA2000DeviceInfo(
 #define DEVICE_ADDRESS 25
 #define SNMEA_SPI_CS_PIN PIN_PA5  
 
+
 PressureMonitor pressureMonitor = PressureMonitor(DEVICE_ADDRESS, 
           &devInfo, 
           &productInfomation, 
           &configInfo, 
           &txPGN[0], 
+          SNMEA200_DEFAULT_TX_PGN_LEN+5,
           &rxPGN[0],
+          SNMEA200_DEFAULT_RX_PGN_LEN,
           SNMEA_SPI_CS_PIN
 );
 CommandLine commandLine = CommandLine(&Serial, &pressureMonitor);
@@ -95,24 +98,24 @@ void sendReading() {
 #define INSIDE_HUMIDITY 0
 #define ATMOSPHERIC 0
   if ( commandLine.periodPGN130310 != 0 && now-last130310 > commandLine.periodPGN130310) {
-    next130310Update = now;
+    last130310 = now;
     pressureMonitor.sendOutsideEnvironmentParameters(sid, SNMEA2000::n2kDoubleNA,  CToKelvin(BMESensor.temperature), BMESensor.pressure);    
   }
   if ( commandLine.periodPGN130311 != 0 && now-last130311 > commandLine.periodPGN130311) {
-    next130311Update = now;
+    last130311 = now;
     pressureMonitor.sendEnvironmentParameters(sid, BMESensor.pressure, MAIN_CABIN_TEMPERATURE, CToKelvin(BMESensor.temperature), INSIDE_HUMIDITY, BMESensor.humidity);
   }
   if ( commandLine.periodPGN130313 != 0 && now-last130313 >   commandLine.periodPGN130313) {
-    next130313Update = now;
+    last130313 = now;
       // NMEA2000 v3 messages, more resolution.
       pressureMonitor.sendHumidity(sid, INSIDE_HUMIDITY, 0, BMESensor.humidity);
   }
   if ( commandLine.periodPGN130314 != 0 && now-last130314 >  commandLine.periodPGN130314) {
-    next130314Update = now;
+    last130314 = now;
     pressureMonitor.sendPressure(sid, ATMOSPHERIC, 0, BMESensor.pressure);
   }
   if ( commandLine.periodPGN130316 != 0 && now-last130316  > commandLine.periodPGN130316) {
-    next130316Update = now;
+    last130316 = now;
     pressureMonitor.sendTemperature(sid, MAIN_CABIN_TEMPERATURE, 0, CToKelvin(BMESensor.temperature));
   }
 }
