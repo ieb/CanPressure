@@ -5,6 +5,7 @@
 #include "BME280_t.h"                                                   // import BME280 template library
 #include "SmallNMEA2000.h"
 #include "commandline.h"
+#include "version.h"
 
 
 
@@ -124,6 +125,12 @@ void sendReading() {
 void setup() {
   Serial.begin(115200);
   Serial.println(F("Pressure monitor start"));
+  Serial.print(F("Version: "));
+  Serial.println(F(GIT_SHA1_VERSION));
+  if (GIT_LOCAL_CHANGES > 0) {
+    Serial.print(F("With Local Changes: "));
+    Serial.println(GIT_LOCAL_CHANGES);
+  }   
   commandLine.begin();
 
 
