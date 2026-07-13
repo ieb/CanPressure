@@ -41,7 +41,7 @@ class CommandLine {
         CommandLine(UartClass * io, SNMEA2000 *nmea2000) : io{io}, nmea2000{nmea2000} {};
 
         unsigned char deviceAddress = 25;
-        uint32_t serialNumber = 123;
+        uint32_t serialNumber = 99999123; // set high to lower address claim priorty
         uint16_t periodPGN130310 = 5000;  //  Outside Environmental parameters
         uint16_t periodPGN130311 = 5000;  //  Environmental parameters
         uint16_t periodPGN130313 = 5000;  //  Humidity parameters

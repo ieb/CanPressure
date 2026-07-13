@@ -28,7 +28,7 @@ const SNMEA2000ConfigInfo configInfo PROGMEM={
 uint8_t pgnEnableRegister = 0xff;
 
 
-const unsigned long txPGN[] PROGMEM = { 
+const unsigned long txPGN[] = { 
     130310L, //  Outside Environmental parameters
     130311L,  // Environmental parameters
     130313L,  // Humidity parameters
@@ -36,12 +36,12 @@ const unsigned long txPGN[] PROGMEM = {
     130316L,  // Temperature parameters
     SNMEA200_DEFAULT_TX_PGN
 };
-const unsigned long rxPGN[] PROGMEM = { 
+const unsigned long rxPGN[] = { 
   SNMEA200_DEFAULT_RX_PGN
 };
 
 const SNMEA2000DeviceInfo devInfo = SNMEA2000DeviceInfo(
-  01,   // device serial number
+  99923232,   // device serial number
   130,  //Atmospheric Function
   85 // Enternal Environment monitor
 );
@@ -142,7 +142,7 @@ void setup() {
   Serial.println(F("Sensor Ok"));
   pressureMonitor.setSerialNumber(commandLine.serialNumber);
   pressureMonitor.setDeviceAddress(commandLine.deviceAddress);
-  Serial.println(F("Opening CAN"));
+  Serial.println(F("Opening CAN with 8MHz MCP Crystal"));
   while ( !pressureMonitor.open() ) {
     Serial.println(F("Failed to start NMEA2000, retry in 5s"));
     delay(5000);

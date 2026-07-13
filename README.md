@@ -1,11 +1,13 @@
 # Can Pressure sender
 
 * Emits PGN  130310L  Outside Environmental parameters and 130311L Environmental parameters with temperature, pressure, humidity from a BME280 sensor.
-* Draws about 10-15mA. Uses a Attiny3224, MCP2551 CAN, and TJ1050.
+* Draws about 10-15mA. Uses a Attiny3224, MCP2551 CAN using an 8MHz crystal, and TJ1050.
 * Attiny runs at 16MHz, but could almost certainly run slower for lower power consumption.
 * PCB in pcb/ measures 66mmx27mm and is powered by 12v from NMEA2000 bus, 5V via a AMS1117, BMP280 module has its own 622K 3v regulator and level shifters.
 * Needs a UDPI Programmer (I am using a UNO based programmer)
 * Header for TTL Serial debugging using single character command line input.
+
+Note, if the MCP Crystal does not match the code, when the device is plugged in it will address claim at the wrong bus frequency causing all other devices on the bus to start to fail. Check before programming that the device is running with an 8MHz MCP crystal. Change the code if using a 16MHz crystal.
 
 
 # Pins and Layout
